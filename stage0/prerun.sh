@@ -8,13 +8,14 @@ fi
 if [ ! -d "${ROOTFS_DIR}" ]; then
 	# Install keyrings on HOST before bootstrap to ensure GPG signature validation
 	apt-get -qq update
-	apt-get -qq install -y --no-install-recommends apt-key debian-archive-keyring gnupg wget
+	apt-get -qq install -y --no-install-recommends debian-archive-keyring gnupg wget
 	
-	# Manually download and install Raspbian archive keyring
+	# Manually download and install Raspbian archive keyring GPG file
 	if [ ! -f /usr/share/keyrings/raspbian-archive-keyring.gpg ]; then
-		wget -q -O /tmp/raspbian-archive-keyring.deb http://archive.raspbian.org/raspbian/pool/main/r/raspbian-archive-keyring/raspbian-archive-keyring_20120528.2_all.deb
-		dpkg -i /tmp/raspbian-archive-keyring.deb
-		rm -f /tmp/raspbian-archive-keyring.deb
+		mkdir -p /usr/share/keyrings
+		wget -q -O /usr/share/keyrings/raspbian-archive-keyring.gpg https://archive.raspbian.org/raspbian.public.key
+		# Also import into the GPG keyring for debootstrap
+		gpg --import --no-default-keyring --keyring /usr/share/keyrings/raspbian-archive-keyring.gpg /usr/share/keyrings/raspbian-archive-keyring.gpg 2>/dev/null || true
 	fi
 	
 	# Use the Raspbian archive
