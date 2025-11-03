@@ -86,12 +86,14 @@ BUILD_OPTS="$(echo "${BUILD_OPTS:-}" | sed -E 's@\-c\s?([^ ]+)@-c /config@')"
 case "$(uname -m)" in
   x86_64|aarch64)
     BASE_IMAGE=i386/debian:trixie
+    PLATFORM_ARG="--platform linux/386"
     ;;
   *)
     BASE_IMAGE=debian:trixie
+    PLATFORM_ARG=""
     ;;
 esac
-${DOCKER} build --build-arg BASE_IMAGE=${BASE_IMAGE} -t pi-gen "${DIR}"
+${DOCKER} build --debug ${PLATFORM_ARG} --build-arg BASE_IMAGE=${BASE_IMAGE} -t pi-gen "${DIR}"
 
 if [ "${CONTAINER_EXISTS}" != "" ]; then
   DOCKER_CMDLINE_NAME="${CONTAINER_NAME}_cont"
