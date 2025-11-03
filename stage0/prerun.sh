@@ -8,7 +8,7 @@ fi
 if [ ! -d "${ROOTFS_DIR}" ]; then
 	# Install keyrings on HOST before bootstrap to ensure GPG signature validation
 	apt-get -qq update
-	apt-get -qq install -y --no-install-recommends debian-archive-keyring gnupg wget
+	apt-get -qq install -y --no-install-recommends apt-key debian-archive-keyring gnupg wget
 	
 	# Manually download and install Raspbian archive keyring
 	if [ ! -f /usr/share/keyrings/raspbian-archive-keyring.gpg ]; then
