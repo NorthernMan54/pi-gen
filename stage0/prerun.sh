@@ -6,11 +6,17 @@ if [ "$RELEASE" != "trixie" ]; then
 fi
 
 if [ ! -d "${ROOTFS_DIR}" ]; then
-	# Install keyring packages on HOST before bootstrap to ensure GPG signature validation
-	# These are needed by debootstrap which runs on the host, not in the target rootfs
+	# Install keyrings on HOST before bootstrap to ensure GPG signature validation
 	apt-get -qq update
-	apt-get -qq install -y --no-install-recommends debian-archive-keyring raspbian-archive-keyring || true
+	apt-get -qq install -y --no-install-recommends debian-archive-keyring gnupg wget
 	
-	# Use the official Debian archive for Raspberry Pi OS with proper keyring
-	bootstrap ${RELEASE} "${ROOTFS_DIR}" http://deb.debian.org/debian/
+	# Manually download and install Raspbian archive keyring
+	if [ ! -f /usr/share/keyrings/raspbian-archive-keyring.gpg ]; then
+		wget -q -O /tmp/raspbian-archive-keyring.deb http://archive.raspbian.org/raspbian/pool/main/r/raspbian-archive-keyring/raspbian-archive-keyring_20120528.2_all.deb
+		dpkg -i /tmp/raspbian-archive-keyring.deb
+		rm -f /tmp/raspbian-archive-keyring.deb
+	fi
+	
+	# Use the Raspbian archive
+	bootstrap ${RELEASE} "${ROOTFS_DIR}" http://raspbian.raspberrypi.com/raspbian/
 fi
