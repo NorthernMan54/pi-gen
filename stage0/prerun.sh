@@ -8,16 +8,20 @@ fi
 if [ ! -d "${ROOTFS_DIR}" ]; then
 	# Install keyrings on HOST before bootstrap to ensure GPG signature validation
 	apt-get -qq update
-	apt-get -qq install -y --no-install-recommends debian-archive-keyring gnupg wget
+	apt-get -qq install -y --no-install-recommends debian-archive-keyring gnupg wget ca-certificates
 	
 	# Manually download and install Raspbian archive keyring GPG file
-	if [ ! -f /usr/share/keyrings/raspbian-archive-keyring.gpg ]; then
+	RASPBIAN_KEYRING="/usr/share/keyrings/raspbian-archive-keyring.gpg"
+	if [ ! -f "${RASPBIAN_KEYRING}" ]; then
 		mkdir -p /usr/share/keyrings
-		wget -q -O /usr/share/keyrings/raspbian-archive-keyring.gpg https://archive.raspbian.org/raspbian.public.key
-		# Also import into the GPG keyring for debootstrap
-		gpg --import --no-default-keyring --keyring /usr/share/keyrings/raspbian-archive-keyring.gpg /usr/share/keyrings/raspbian-archive-keyring.gpg 2>/dev/null || true
+		# Download the public key and convert to GPG keyring format
+		wget -q -O - https://archive.raspbian.org/raspbian.public.key | gpg --dearmor > "${RASPBIAN_KEYRING}"
 	fi
 	
-	# Use the Raspbian archive
-	bootstrap ${RELEASE} "${ROOTFS_DIR}" http://raspbian.raspberrypi.com/raspbian/
+	echo "Bootstrapping Raspberry Pi OS base system..."
+
+	echo "/usr/share/debootstrap bootstrap ${RELEASE} \"${ROOTFS_DIR}\" http://raspbian.raspberrypi.com/raspbian/ --keyring=\"${RASPBIAN_KEYRING}\""
+
+	# Use the Raspbian archive with explicit keyring
+	debootstrap --verbose bootstrap ${RELEASE} "${ROOTFS_DIR}" http://raspbian.raspberrypi.com/raspbian/ --keyring="${RASPBIAN_KEYRING}"
 fi
