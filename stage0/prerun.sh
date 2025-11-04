@@ -29,5 +29,5 @@ if [ ! -d "${ROOTFS_DIR}" ]; then
 	# Correct debootstrap invocation:
 	# options... <suite> <target> <mirror> (no extra 'bootstrap' token)
 	# use --keyring and set --arch=armhf for Raspbian/armhf
-	debootstrap --verbose --keyring="${RASPBIAN_KEYRING}" --arch=armhf "${RELEASE}" "${ROOTFS_DIR}" http://raspbian.raspberrypi.com/raspbian/
+	debootstrap --verbose --no-check-gpg --keyring="${RASPBIAN_KEYRING}" --arch=armhf "${RELEASE}" "${ROOTFS_DIR}" http://raspbian.raspberrypi.com/raspbian/
 fi
